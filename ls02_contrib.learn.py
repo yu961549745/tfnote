@@ -28,6 +28,7 @@ estimator = tf.contrib.learn.LinearRegressor(feature_columns=features)
 # of data (num_epochs) we want and how big each batch should be.
 x = np.array([1., 2., 3., 4.])
 y = np.array([0., -1., -2., -3.])
+# 其实这里的 num_epochs 不是很明白
 input_fn = tf.contrib.learn.io.numpy_input_fn({"x": x}, y, batch_size=4,
                                               num_epochs=1000)
 
@@ -37,4 +38,4 @@ estimator.fit(input_fn=input_fn, steps=1000)
 
 # Here we evaluate how well our model did. In a real example, we would want
 # to use a separate validation and testing data set to avoid overfitting.
-estimator.evaluate(input_fn=input_fn)
+print(estimator.evaluate(input_fn=input_fn))
