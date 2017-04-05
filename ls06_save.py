@@ -25,16 +25,11 @@ b = tf.Variable(tf.zeros([10]), name='biases')
 output = tf.nn.softmax(tf.matmul(input, W) + b, name='output')
 cross_entropy = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(labels=valid, logits=output))
-train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+train_step = tf.train.GradientDescentOptimizer(
+    0.5, name="gd_train").minimize(cross_entropy)
 correct_prediction = tf.equal(tf.argmax(output, 1), tf.argmax(valid, 1))
 accuracy = tf.reduce_mean(
     tf.cast(correct_prediction, tf.float32), name='accuracy')
-
-# 添加以后需要用到的相关变量
-tf.add_to_collection('input', input)
-tf.add_to_collection('output', output)
-tf.add_to_collection('valid', valid)
-tf.add_to_collection('accuracy', accuracy)
 
 # 训练和保存模型
 if os.path.exists(modelDir):
