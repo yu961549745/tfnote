@@ -1,36 +1,15 @@
-""" TensorFlow 模型导入导出 """
+""" 
+TensorFlow 模型导入导出 
 
-#%% 定义模型
-from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+MetaGraph 包含 GraphDef 和相关的 meatadata ，可以用于保存 graphs 。
+可以用于继续训练，和执行。包含以下几个部分：
+MetaInfoDef metadata，例如版本信息
+GraphDef 描述  graph
+SaverDef 描述 saver
+CollectionDef 描述变量等信息
 
-import tensorflow as tf
-x = tf.placeholder(tf.float32, [None, 784])
-W = tf.Variable(tf.zeros([784, 10]))
-b = tf.Variable(tf.zeros([10]))
-y = tf.nn.softmax(tf.matmul(x, W) + b)
-y_ = tf.placeholder(tf.float32, [None, 10])
-cross_entropy = tf.reduce_mean(
-    tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
-train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+采用 saver.export_meta_graph(filename=None, collection_list=None, as_text=False) 可以导出整个 graph
+如果不指定 collection_list 则会导出所有  collection
+MetaGraph 也会被 tf.train.Saver 的 save 函数自动导出
 
-#%% 训练和保存模型
-with tf.Session() as sess:
-    tf.global_variables_initializer().run()
-    for _ in range(1000):
-        batch_xs, batch_ys = mnist.train.next_batch(100)
-        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
-    print(sess.run(accuracy, feed_dict={
-        x: mnist.test.images, y_: mnist.test.labels}))
-    saver = tf.train.Saver()
-    saver.save(sess, 'model/my-model')
-    saver.export_meta_graph('model/my-model.meta')
-
-#%% 加载和运行模型
-sess = tf.Session()
-new_saver = tf.train.import_meta_graph('model/my-model.meta')
-new_saver.restore(sess, 'model/my-model')
-print(sess.run(accuracy, feed_dict={
-    x: mnist.test.images, y_: mnist.test.labels}))
+"""

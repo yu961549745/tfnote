@@ -1,3 +1,5 @@
 /MNIST_data
-/model
+/MNIST_softmax_model
 /log
+/iris
+/iris_model
