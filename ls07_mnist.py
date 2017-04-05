@@ -38,11 +38,14 @@ def inference(images, hidden1_units, hidden2_units):
       softmax_linear: Output tensor with the computed logits.
     """
     # Hidden 1
+    # tf.truncated_normal 声明了一个2D Tensor ， 第一个纬度是输入参数的纬度，第二个纬度的输出参数的纬度
+    # tf.truncated_normal 采用随机数初始化变量，可以给定均值和标准差
+    # 偏置则采用 tf.zeros 来0进行初始化
     with tf.name_scope('hidden1'):
         weights = tf.Variable(
             tf.truncated_normal([IMAGE_PIXELS, hidden1_units],
                                 stddev=1.0 / math.sqrt(float(IMAGE_PIXELS))),
-            name='weights')
+            name='weights')  # 从而这个节点的名字是 "hidden1/weights"
         biases = tf.Variable(tf.zeros([hidden1_units]),
                              name='biases')
         hidden1 = tf.nn.relu(tf.matmul(images, weights) + biases)
@@ -71,11 +74,13 @@ def loss(logits, labels):
     """Calculates the loss from the logits and the labels.
     Args:
       logits: Logits tensor, float - [batch_size, NUM_CLASSES].
-      labels: Labels tensor, int32 - [batch_size].
+      labels: Labels tensor, int32 - [batch_size]. 这边的每个期望输出是一个类编号，而不是一个分类向量
     Returns:
       loss: Loss tensor of type float.
     """
     labels = tf.to_int64(labels)
+    # tf.nn.sparse_softmax_cross_entropy_with_logits 自动处理单点的label，
+    # 用来计算交叉熵
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
         labels=labels, logits=logits, name='xentropy')
     return tf.reduce_mean(cross_entropy, name='xentropy_mean')
@@ -94,13 +99,17 @@ def training(loss, learning_rate):
       train_op: The Op for training.
     """
     # Add a scalar summary for the snapshot loss.
+    # it will emit the snapshot value of the loss every time the summaries are written out.
+    # 这样可以在每次输出时同时输出loss
     tf.summary.scalar('loss', loss)
     # Create the gradient descent optimizer with the given learning rate.
     optimizer = tf.train.GradientDescentOptimizer(learning_rate)
     # Create a variable to track the global step.
+    # 变量用于记录训练次数
     global_step = tf.Variable(0, name='global_step', trainable=False)
     # Use the optimizer to apply the gradients that minimize the loss
     # (and also increment the global step counter) as a single training step.
+    # 这边指明用 global_step 记录 global_step
     train_op = optimizer.minimize(loss, global_step=global_step)
     return train_op
 
