@@ -1,13 +1,13 @@
 """ 卷积神经网络训练MNIST """
-
-#%% 准备工作
+#%%
+# 准备工作
 # 定义常量
 import os
 import shutil
+import time
 dataPath = 'MNIST_data'
 modelSavePath = 'MNIST_conv'
-modelCkpName = 'softmax'
-modelCkpPath = os.path.join(modelSavePath, modelCkpName)
+modelCkpPath = os.path.join(modelSavePath, 'conv')
 modelMetaFile = modelCkpPath + ".meta"
 
 # 读取数据
@@ -19,7 +19,7 @@ mnist = input_data.read_data_sets(dataPath, one_hot=True)
 import tensorflow as tf
 sess = tf.InteractiveSession()
 
-#%% 定义CNN
+# 定义CNN
 
 
 def weight_variable(shape):
@@ -90,15 +90,16 @@ with tf.name_scope('valid'):
     accuracy = tf.reduce_mean(
         tf.cast(correct_prediction, tf.float32), name='accuracy')
 
-#%% 模型训练
-
+# 模型训练
 sess.run(tf.global_variables_initializer())
+st = time.time()
 for i in range(1000):
     batch = mnist.train.next_batch(50)
     if i % 200 == 0:
         test_accuracy = accuracy.eval(feed_dict={
             input_image: mnist.validation.images, output_valid: mnist.validation.labels, keep_prob: 1.0})
-        print("step %d, validation accuracy %g" % (i, test_accuracy))
+        print("step %d, validation accuracy %g, time=%.3f sec" %
+              (i, test_accuracy, time.time() - st))
     train_step.run(
         feed_dict={input_image: batch[0], output_valid: batch[1], keep_prob: 0.5})
 
