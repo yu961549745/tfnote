@@ -95,10 +95,10 @@ with tf.name_scope('valid'):
 sess.run(tf.global_variables_initializer())
 for i in range(1000):
     batch = mnist.train.next_batch(50)
-    if i % 100 == 0:
+    if i % 200 == 0:
         test_accuracy = accuracy.eval(feed_dict={
-            input_image: mnist.test.images, output_valid: mnist.test.labels, keep_prob: 1.0})
-        print("step %d, test accuracy %g" % (i, test_accuracy))
+            input_image: mnist.validation.images, output_valid: mnist.validation.labels, keep_prob: 1.0})
+        print("step %d, validation accuracy %g" % (i, test_accuracy))
     train_step.run(
         feed_dict={input_image: batch[0], output_valid: batch[1], keep_prob: 0.5})
 
