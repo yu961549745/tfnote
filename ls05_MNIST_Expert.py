@@ -9,6 +9,7 @@ dataPath = 'MNIST_data'
 modelSavePath = 'MNIST_conv'
 modelCkpPath = os.path.join(modelSavePath, 'conv')
 modelMetaFile = modelCkpPath + ".meta"
+trainSteps = 500
 
 # 读取数据
 from tensorflow.examples.tutorials.mnist import input_data
@@ -17,7 +18,6 @@ mnist = input_data.read_data_sets(dataPath, one_hot=True)
 # 启动会话
 # InteractiveSession更适合在交互式环境下使用
 import tensorflow as tf
-sess = tf.InteractiveSession()
 
 # 定义CNN
 
@@ -91,26 +91,38 @@ with tf.name_scope('valid'):
         tf.cast(correct_prediction, tf.float32), name='accuracy')
 
 # 模型训练
+if os.path.exists(modelSavePath):
+    shutil.rmtree(modelSavePath)
+os.mkdir(modelSavePath)
+
+sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
+
+# 添加 summary
+tf.summary.scalar('loss', cross_entropy)
+summary = tf.summary.merge_all()
+summary_writer = tf.summary.FileWriter(modelSavePath, sess.graph)
+saver = tf.train.Saver()
+
+# 训练
 st = time.time()
-for i in range(1000):
+for step in range(trainSteps):
     batch = mnist.train.next_batch(50)
-    if i % 200 == 0:
-        test_accuracy = accuracy.eval(feed_dict={
-            input_image: mnist.validation.images, output_valid: mnist.validation.labels, keep_prob: 1.0})
-        print("step %d, validation accuracy %g, time=%.3f sec" %
-              (i, test_accuracy, time.time() - st))
-    train_step.run(
-        feed_dict={input_image: batch[0], output_valid: batch[1], keep_prob: 0.5})
+    if step % 100 == 0 or step == trainSteps - 1:
+        _, loss_value, train_accuracy, summary_str = sess.run([train_step, cross_entropy, accuracy, summary], feed_dict={
+            input_image: batch[0], output_valid: batch[1], keep_prob: 0.5})
+        print("step = %d, loss = %g, train_accuracy = %g, time=%.3f sec" %
+              (step, loss_value, train_accuracy, time.time() - st))
+        summary_writer.add_summary(summary_str, step)
+        summary_writer.flush()
+    else:
+        sess.run(train_step, feed_dict={
+            input_image: batch[0], output_valid: batch[1], keep_prob: 0.5})
 
 print("test accuracy %g" % accuracy.eval(feed_dict={
     input_image: mnist.test.images, output_valid: mnist.test.labels, keep_prob: 1.0}))
 
 # 保存模型
-if os.path.exists(modelSavePath):
-    shutil.rmtree(modelSavePath)
-os.mkdir(modelSavePath)
-saver = tf.train.Saver()
 saver.save(sess, modelCkpPath)
 saver.export_meta_graph(modelMetaFile)
-tf.summary.FileWriter(modelSavePath, sess.graph)
+sess.close()
