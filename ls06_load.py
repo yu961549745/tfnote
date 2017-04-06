@@ -20,16 +20,16 @@ new_saver = tf.train.import_meta_graph(modelFile)
 new_saver.restore(sess, modelPath)
 
 # 提取相关变量
-input = sess.graph.get_tensor_by_name('input:0')
-output = sess.graph.get_tensor_by_name('output:0')
-valid = sess.graph.get_tensor_by_name('valid:0')
-accuracy = sess.graph.get_tensor_by_name('accuracy:0')
+input = sess.graph.get_tensor_by_name('linear_softmax/input:0')
+output = sess.graph.get_tensor_by_name('linear_softmax/output:0')
+valid = sess.graph.get_tensor_by_name('train/valid:0')
+accuracy = sess.graph.get_tensor_by_name('valid/accuracy:0')
 
 print(sess.run(accuracy, feed_dict={
     input: mnist.test.images, valid: mnist.test.labels}))
 
 # 提取模型并继续训练
-train_step = sess.graph.get_operation_by_name('gd_train')
+train_step = sess.graph.get_operation_by_name('train/gd_train')
 for _ in range(1000):
     batch_xs, batch_ys = mnist.train.next_batch(100)
     sess.run(train_step, feed_dict={input: batch_xs, valid: batch_ys})
