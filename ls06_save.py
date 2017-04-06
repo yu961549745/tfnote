@@ -48,4 +48,4 @@ with tf.Session() as sess:
     saver = tf.train.Saver()
     saver.save(sess, modelPath)
     saver.export_meta_graph(modelFile)
-    tf.summary.FileWriter(modelPath, sess.graph)
+    tf.summary.FileWriter(modelDir, sess.graph)
