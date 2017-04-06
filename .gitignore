@@ -4,4 +4,5 @@
 /log
 /iris
 /iris_model
+/__pycache__
 *.ipynb
