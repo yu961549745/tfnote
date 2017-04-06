@@ -22,11 +22,17 @@ def max_pool_2x2(input_image):
 
 def build_graph():
     # 定义模型
-    input_image = tf.placeholder(tf.float32, [None, 784], name='input_image')
+    input_image = tf.placeholder(
+        tf.float32, [None, 784], name='input_image')  # [n,784]
     output_valid = tf.placeholder(tf.float32, [None, 10], name='valid_output')
 
     with tf.name_scope('hidden1'):
         # 第一卷积层
+        # [n,784] -> [n,28,28,1]
+        # conv with [5,5,1,32] -> [n,28,28,32]
+        # add biasis numpy数组加法，对齐最后一个维度，然后当两个维度相等，或者其中一个为1时可以进行加法
+        # max pool -> [n,14,14,32]
+
         # 5,5 表示卷积的面片大小，1表示输入channels，32表示输出 channels
         W_conv1 = weight_variable([5, 5, 1, 32])
         # 对应的偏置向量
@@ -39,6 +45,7 @@ def build_graph():
 
     with tf.name_scope('hidden2'):
         # 第二层卷积，提取64个特征，图像大小变成7*7
+        # [n,14,14,32] -> [n,14,14,64] -> [n,7,7,64]
         W_conv2 = weight_variable([5, 5, 32, 64])
         b_conv2 = bias_variable([64])
         h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
@@ -46,6 +53,7 @@ def build_graph():
 
     with tf.name_scope('full_link'):
         # 全连接层，将64个特征，用1024个神经元，套上ReLU进行输出
+        # [n,7,7,64] -> [n,7*7*64]*[7*7*64,1024] -> [n,1024]
         W_fc1 = weight_variable([7 * 7 * 64, 1024])
         b_fc1 = bias_variable([1024])
         h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * 64])
@@ -56,6 +64,7 @@ def build_graph():
 
     with tf.name_scope('linear_output'):
         # 输出层
+        # [n,1024]*[1024,10] -> [n,10]
         W_fc2 = weight_variable([1024, 10])
         b_fc2 = bias_variable([10])
         output = tf.add(tf.matmul(h_fc1_drop, W_fc2), b_fc2, name='output')
@@ -73,9 +82,7 @@ def build_graph():
         accuracy = tf.reduce_mean(
             tf.cast(correct_prediction, tf.float32), name='accuracy')
 
-    predict = tf.argmax(output, name='predict')
-
-    return input_image, output_valid, keep_prob, train_step, accuracy, cross_entropy, predict
+    return input_image, output_valid, keep_prob, train_step, accuracy, cross_entropy, output
 
 
 def restore_graph(sess):
@@ -85,5 +92,5 @@ def restore_graph(sess):
     train_step = sess.graph.get_operation_by_name('train/train')
     accuracy = sess.graph.get_tensor_by_name('valid/accuracy:0')
     cross_entropy = sess.graph.get_tensor_by_name('train/cross_entropy:0')
-    predict = sess.graph.get_tensor_by_name('predict:0')
-    return input_image, output_valid, keep_prob, train_step, accuracy, cross_entropy, predict
+    output = sess.graph.get_tensor_by_name('linear_output/output:0')
+    return input_image, output_valid, keep_prob, train_step, accuracy, cross_entropy, output

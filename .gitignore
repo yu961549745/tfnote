@@ -6,3 +6,4 @@
 /iris_model
 /__pycache__
 *.ipynb
+*.txt
