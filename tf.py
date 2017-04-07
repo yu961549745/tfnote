@@ -2,7 +2,7 @@ import tensorflow as tf
 import ls05_mnist as model
 import numpy as np
 
-version = 2
+version = 1
 
 
 class MNIST(object):
