@@ -3,4 +3,5 @@ clear all
 clear classes
 mod = py.importlib.import_module('tf');
 py.importlib.reload(mod);
-disp(py.tf.version)
+fprintf('py.tf reloaded , version = %d\n',double(py.tf.version));
+clear all

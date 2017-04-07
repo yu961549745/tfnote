@@ -6,10 +6,10 @@ version = 1
 
 
 class MNIST(object):
-    def __init__(self):
+    def __init__(self, meta, ckp):
         sess = tf.Session()
-        saver = tf.train.import_meta_graph('MNIST_conv/conv.meta')
-        saver.restore(sess, 'MNIST_conv/conv-999')
+        saver = tf.train.import_meta_graph(meta)
+        saver.restore(sess, ckp)
         input_image, _, keep_prob, _, _, _, output = model.restore_graph(
             sess)
         self.sess = sess
@@ -21,4 +21,5 @@ class MNIST(object):
         return self.sess.run(tf.argmax(self.output, 1), feed_dict={self.input_image: np.array(img, dtype=np.float32).reshape(-1, 784), self.keep_prob: 1.0})
 
     def close(self):
+        print('TensorFlow Session Closed')
         self.sess.close()
