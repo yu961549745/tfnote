@@ -4,6 +4,6 @@
 /log
 /iris
 /iris_model
-/__pycache__
+*.pyc
 *.ipynb
 *.txt
