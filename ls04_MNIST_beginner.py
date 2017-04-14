@@ -15,7 +15,7 @@ W = tf.Variable(tf.zeros([784, 10]))
 b = tf.Variable(tf.zeros([10]))
 
 # 定义输出变量
-y = tf.nn.softmax(tf.matmul(x, W) + b)
+y = tf.matmul(x, W) + b
 
 #%% 训练模型
 # 答案
